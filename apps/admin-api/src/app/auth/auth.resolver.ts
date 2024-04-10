@@ -1,8 +1,7 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 
-import { AuthService } from './auth.service';
+import { AuthDbService, UsersDbService } from '@impulsou/services';
 import { RegisterUserInput } from './dto';
-import { UsersService } from '../users/users.service';
 import {
   BadRequestException,
   Logger,
@@ -17,14 +16,14 @@ import { CurrentUser } from './decorators';
 export class AuthResolver {
   private readonly logger = new Logger(AuthResolver.name);
   constructor(
-    private readonly authService: AuthService,
-    private readonly usersService: UsersService
+    private readonly authDbService: AuthDbService,
+    private readonly usersDbService: UsersDbService
   ) {}
 
   @Query(() => User)
   @UseGuards(GqlAuthGuard)
   profile(@CurrentUser('user') user: User) {
-    return this.authService.getProfile(user.id);
+    return this.usersDbService.findOne({ where: { id: user.id } });
   }
 
   @Mutation(() => Token)
@@ -32,7 +31,7 @@ export class AuthResolver {
     @Args('email') email: string,
     @Args('password') password: string
   ) {
-    const user = await this.authService.validateUser(email, password);
+    const user = await this.authDbService.validateUser(email, password);
     if (!user) {
       throw new UnauthorizedException({
         status: 401,
@@ -48,7 +47,7 @@ export class AuthResolver {
       });
     }
     this.logger.log(`User with email: ${email} logged in.`);
-    const token: Token = { token: await this.authService.login(user) };
+    const token: Token = { token: await this.authDbService.login(user) };
     return token;
   }
 
@@ -57,7 +56,10 @@ export class AuthResolver {
     @Args('registerUserInput') registerUserInput: RegisterUserInput
   ) {
     if (
-      await this.usersService.findOneByEmail(registerUserInput.email, false)
+      await this.usersDbService.findOne(
+        { where: { email: registerUserInput.email } },
+        false
+      )
     ) {
       this.logger.log('Register User Fail: Duplicate Email');
       throw new BadRequestException({
@@ -65,7 +67,7 @@ export class AuthResolver {
         message: 'Error',
       });
     }
-    const user = await this.usersService.register(registerUserInput);
+    const user = await this.usersDbService.create(registerUserInput);
     this.logger.log(`User with email: ${user.email} created.`);
     return 'Registro realizado con éxito.';
   }

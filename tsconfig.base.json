@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@impulsou/models": ["libs/models/src/index.ts"]
+      "@impulsou/models": ["libs/models/src/index.ts"],
+      "@impulsou/services": ["libs/services/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

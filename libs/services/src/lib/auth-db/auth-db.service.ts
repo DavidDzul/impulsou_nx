@@ -1,20 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { UsersDbService } from '../users-db';
+
 import { User } from '@impulsou/models';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
+export class AuthDbService {
+  private readonly logger = new Logger(AuthDbService.name);
   constructor(
-    private readonly usersService: UsersService,
+    private readonly usersDbService: UsersDbService,
     private readonly jwtService: JwtService
   ) {}
 
   async validateUser(email: string, pass: string): Promise<Partial<User>> {
     try {
-      const user = await this.usersService.findOneByEmail(email);
+      const user = await this.usersDbService.findOne({
+        where: { email },
+        select: ['id', 'email', 'password', 'active'],
+      });
       const passOk = await bcrypt.compare(pass, user.password);
       if (user && passOk) {
         this.logger.log(`User with email: ${email} validated.`);
@@ -36,18 +40,5 @@ export class AuthService {
       id: user.id,
     };
     return this.jwtService.sign(payload);
-  }
-
-  async getProfile(id: number) {
-    try {
-      const user = await this.usersService.findOne(id);
-      this.logger.log(`User with email: ${user.email} get profile.`);
-      if (user) {
-        return user;
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
   }
 }
