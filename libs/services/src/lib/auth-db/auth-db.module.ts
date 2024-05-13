@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy, LocalStrategy } from './strategies/';
 import { PassportModule } from '@nestjs/passport';
-import { UsersDbModule } from '../users-db';
+import { AdminDbModule } from '../admin-db';
 @Module({
   imports: [
     JwtModule.registerAsync({
@@ -21,7 +21,7 @@ import { UsersDbModule } from '../users-db';
       inject: [ConfigService],
     }),
     PassportModule,
-    UsersDbModule,
+    AdminDbModule,
   ],
   providers: [AuthDbService, LocalStrategy, JwtStrategy],
   exports: [AuthDbService, JwtModule],

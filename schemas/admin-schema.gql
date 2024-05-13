@@ -2,7 +2,7 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type User {
+type Admin {
   id: Int!
   firstName: String!
   lastName: String!
@@ -18,17 +18,10 @@ type Token {
 }
 
 type Query {
-  profile: User!
+  profile: Admin!
+  adminTest: Admin!
 }
 
 type Mutation {
   login(email: String!, password: String!): Token!
-  register(registerUserInput: RegisterUserInput!): String!
-}
-
-input RegisterUserInput {
-  firstName: String!
-  lastName: String!
-  email: String!
-  password: String!
 }

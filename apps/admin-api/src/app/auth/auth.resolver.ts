@@ -1,29 +1,29 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 
-import { AuthDbService, UsersDbService } from '@impulsou/services';
-import { RegisterUserInput } from './dto';
-import {
-  BadRequestException,
-  Logger,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
-import { Token, User } from '@impulsou/models';
+import { AuthDbService, AdminDbService } from '@impulsou/services';
+import { Logger, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Token, Admin } from '@impulsou/models';
 import { GqlAuthGuard } from './guards/';
 import { CurrentUser } from './decorators';
 
-@Resolver(() => User)
+@Resolver(() => Admin)
 export class AuthResolver {
   private readonly logger = new Logger(AuthResolver.name);
   constructor(
     private readonly authDbService: AuthDbService,
-    private readonly usersDbService: UsersDbService
+    private readonly adminDbService: AdminDbService
   ) {}
 
-  @Query(() => User)
+  @Query(() => Admin)
   @UseGuards(GqlAuthGuard)
-  profile(@CurrentUser('user') user: User) {
-    return this.usersDbService.findOne({ where: { id: user.id } });
+  profile(@CurrentUser('user') user: Admin) {
+    this.logger.log(`Admin with email: ${user.email} connected.`);
+    return this.adminDbService.findOne({ where: { id: user.id } });
+  }
+
+  @Query(() => Admin)
+  adminTest() {
+    return this.adminDbService.findOne({ where: { id: 1 } });
   }
 
   @Mutation(() => Token)
@@ -31,15 +31,15 @@ export class AuthResolver {
     @Args('email') email: string,
     @Args('password') password: string
   ) {
-    const user = await this.authDbService.validateUser(email, password);
-    if (!user) {
+    const admin = await this.authDbService.validateAdmin(email, password);
+    if (!admin) {
       throw new UnauthorizedException({
         status: 401,
         message:
           'El correo y/o contraseña es erronea. Verifique e intente nuevamente.',
       });
     }
-    if (!user.active) {
+    if (!admin.active) {
       throw new UnauthorizedException({
         status: 401,
         message:
@@ -47,28 +47,7 @@ export class AuthResolver {
       });
     }
     this.logger.log(`User with email: ${email} logged in.`);
-    const token: Token = { token: await this.authDbService.login(user) };
+    const token: Token = { token: await this.authDbService.login(admin) };
     return token;
-  }
-
-  @Mutation(() => String)
-  async register(
-    @Args('registerUserInput') registerUserInput: RegisterUserInput
-  ) {
-    if (
-      await this.usersDbService.findOne(
-        { where: { email: registerUserInput.email } },
-        false
-      )
-    ) {
-      this.logger.log('Register User Fail: Duplicate Email');
-      throw new BadRequestException({
-        status: 400,
-        message: 'Error',
-      });
-    }
-    const user = await this.usersDbService.create(registerUserInput);
-    this.logger.log(`User with email: ${user.email} created.`);
-    return 'Registro realizado con éxito.';
   }
 }

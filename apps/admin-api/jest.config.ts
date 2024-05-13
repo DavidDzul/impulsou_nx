@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'admin-api',
+  //displayName: 'admin-api',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

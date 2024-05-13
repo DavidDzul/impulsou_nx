@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { UsersDbService } from '../users-db';
+import { AdminDbService } from '../admin-db';
 
-import { User } from '@impulsou/models';
+import { Admin } from '@impulsou/models';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
@@ -9,13 +9,13 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthDbService {
   private readonly logger = new Logger(AuthDbService.name);
   constructor(
-    private readonly usersDbService: UsersDbService,
+    private readonly adminDbService: AdminDbService,
     private readonly jwtService: JwtService
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<Partial<User>> {
+  async validateAdmin(email: string, pass: string): Promise<Partial<Admin>> {
     try {
-      const user = await this.usersDbService.findOne({
+      const user = await this.adminDbService.findOne({
         where: { email },
         select: ['id', 'email', 'password', 'active'],
       });
@@ -34,10 +34,10 @@ export class AuthDbService {
     }
   }
 
-  async login(user: Partial<User>): Promise<string> {
+  async login(admin: Partial<Admin>): Promise<string> {
     const payload = {
-      email: user.email,
-      id: user.id,
+      email: admin.email,
+      id: admin.id,
     };
     return this.jwtService.sign(payload);
   }
