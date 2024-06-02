@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@impulsou/models": ["libs/models/src/index.ts"],
-      "@impulsou/services": ["libs/services/src/index.ts"]
+      "@impulsou/services": ["libs/services/src/index.ts"],
+      "@impulsou/shared": ["libs/shared/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

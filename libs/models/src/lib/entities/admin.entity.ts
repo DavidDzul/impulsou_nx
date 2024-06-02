@@ -7,8 +7,17 @@ import {
   BeforeInsert,
   BeforeUpdate,
 } from 'typeorm';
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
+
+export enum RoleEnum {
+  ADMIN = 'ADMIN',
+  PSICOL = 'PSICOL',
+}
+
+registerEnumType(RoleEnum, {
+  name: 'RoleEnum',
+});
 
 @ObjectType()
 @Entity('admins')
@@ -36,6 +45,12 @@ export class Admin {
   @Column({ default: true })
   @Field()
   active: boolean;
+
+  @Column({ type: 'enum', enum: RoleEnum, nullable: true })
+  @Field(() => RoleEnum, {
+    nullable: true,
+  })
+  role?: RoleEnum;
 
   @CreateDateColumn()
   @Field()

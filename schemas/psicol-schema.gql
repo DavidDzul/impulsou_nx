@@ -1,0 +1,72 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: Int!
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  enrollment: String!
+  phone: String
+  active: Boolean!
+  campus: CampusEnum
+  role: UserTypeEnum
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum CampusEnum {
+  MERIDA
+  VALLADOLID
+  TIZIMIN
+  OXKUTZCAB
+}
+
+enum UserTypeEnum {
+  STUDENT
+  GRADUATE
+}
+
+type Admin {
+  id: Int!
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  active: Boolean!
+  role: RoleEnum
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum RoleEnum {
+  ADMIN
+  PSICOL
+}
+
+type Token {
+  token: String!
+}
+
+type Query {
+  profile: Admin!
+  adminTest: Admin!
+}
+
+type Mutation {
+  createUser(createUserInput: CreateUserInput!): User!
+  login(email: String!, password: String!): Token!
+}
+
+input CreateUserInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  enrollment: String!
+  phone: String
+  campus: CampusEnum!
+  role: UserTypeEnum!
+}

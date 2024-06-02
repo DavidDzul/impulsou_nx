@@ -2,7 +2,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import { AuthDbService, AdminDbService } from '@impulsou/services';
 import { Logger, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { Token, Admin } from '@impulsou/models';
+import { Token, Admin, RoleEnum } from '@impulsou/models';
 import { GqlAuthGuard } from '@impulsou/shared';
 import { CurrentUser } from '@impulsou/shared';
 
@@ -18,7 +18,9 @@ export class AuthResolver {
   @UseGuards(GqlAuthGuard)
   profile(@CurrentUser('user') user: Admin) {
     this.logger.log(`Admin with email: ${user.email} connected.`);
-    return this.adminDbService.findOne({ where: { id: user.id } });
+    return this.adminDbService.findOne({
+      where: { id: user.id, role: RoleEnum.PSICOL },
+    });
   }
 
   @Query(() => Admin)

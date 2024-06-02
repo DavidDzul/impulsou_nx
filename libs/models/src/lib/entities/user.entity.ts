@@ -7,9 +7,28 @@ import {
   BeforeInsert,
   BeforeUpdate,
 } from 'typeorm';
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 
+export enum UserTypeEnum {
+  STUDENT = 'STUDENT',
+  GRADUATE = 'GRADUATE',
+}
+
+export enum CampusEnum {
+  MERIDA = 'MERIDA',
+  VALLADOLID = 'VALLADOLID',
+  TIZIMIN = 'TIZIMIN',
+  OXKUTZCAB = 'OXKUTZCAB',
+}
+
+registerEnumType(UserTypeEnum, {
+  name: 'UserTypeEnum',
+});
+
+registerEnumType(CampusEnum, {
+  name: 'CampusEnum',
+});
 @ObjectType()
 @Entity('users')
 export class User {
@@ -33,9 +52,31 @@ export class User {
   @Field()
   password: string;
 
+  @Column()
+  @Field()
+  enrollment: string;
+
+  @Column({ nullable: true })
+  @Field({
+    nullable: true,
+  })
+  phone?: string;
+
   @Column({ default: true })
   @Field()
   active: boolean;
+
+  @Column({ type: 'enum', enum: CampusEnum, nullable: true })
+  @Field(() => CampusEnum, {
+    nullable: true,
+  })
+  campus: CampusEnum;
+
+  @Column({ type: 'enum', enum: UserTypeEnum, nullable: true })
+  @Field(() => UserTypeEnum, {
+    nullable: true,
+  })
+  role: UserTypeEnum;
 
   @CreateDateColumn()
   @Field()

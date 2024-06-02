@@ -1,6 +1,5 @@
 /* eslint-disable */
 export default {
-  //displayName: 'services',
   preset: '../../jest.preset.js',
   globals: {
     'ts-jest': {
