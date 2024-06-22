@@ -6,29 +6,16 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   BeforeUpdate,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 
-export enum UserTypeEnum {
-  STUDENT = 'STUDENT',
-  GRADUATE = 'GRADUATE',
-}
+import { CampusEnum } from './campus.entity';
+import { Generation, Attendance } from './';
 
-export enum CampusEnum {
-  MERIDA = 'MERIDA',
-  VALLADOLID = 'VALLADOLID',
-  TIZIMIN = 'TIZIMIN',
-  OXKUTZCAB = 'OXKUTZCAB',
-}
-
-registerEnumType(UserTypeEnum, {
-  name: 'UserTypeEnum',
-});
-
-registerEnumType(CampusEnum, {
-  name: 'CampusEnum',
-});
 @ObjectType()
 @Entity('users')
 export class User {
@@ -66,17 +53,13 @@ export class User {
   @Field()
   active: boolean;
 
-  @Column({ type: 'enum', enum: CampusEnum, nullable: true })
-  @Field(() => CampusEnum, {
-    nullable: true,
-  })
+  @Column({ type: 'enum', enum: CampusEnum })
+  @Field(() => CampusEnum)
   campus: CampusEnum;
 
-  @Column({ type: 'enum', enum: UserTypeEnum, nullable: true })
-  @Field(() => UserTypeEnum, {
-    nullable: true,
-  })
-  role: UserTypeEnum;
+  @Column({ nullable: true, unsigned: true })
+  @Field({ nullable: true })
+  generationId: number;
 
   @CreateDateColumn()
   @Field()
@@ -85,6 +68,15 @@ export class User {
   @UpdateDateColumn()
   @Field()
   updatedAt: string;
+
+  /* Relationships */
+  @ManyToOne(() => Generation, (generation) => generation.users)
+  @Field(() => Generation, { nullable: true })
+  generation: Generation;
+
+  @OneToMany(() => Attendance, (att) => att.user)
+  @Field(() => Attendance)
+  attendance: Attendance;
 
   @BeforeInsert()
   @BeforeUpdate()

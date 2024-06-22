@@ -11,10 +11,12 @@ type User {
   enrollment: String!
   phone: String
   active: Boolean!
-  campus: CampusEnum
-  role: UserTypeEnum
+  campus: CampusEnum!
+  generationId: Float
   createdAt: String!
   updatedAt: String!
+  generation: Generation
+  attendance: Attendance!
 }
 
 enum CampusEnum {
@@ -22,11 +24,6 @@ enum CampusEnum {
   VALLADOLID
   TIZIMIN
   OXKUTZCAB
-}
-
-enum UserTypeEnum {
-  STUDENT
-  GRADUATE
 }
 
 type Admin {
@@ -37,6 +34,7 @@ type Admin {
   password: String!
   active: Boolean!
   role: RoleEnum
+  campus: CampusEnum!
   createdAt: String!
   updatedAt: String!
 }
@@ -46,18 +44,64 @@ enum RoleEnum {
   PSICOL
 }
 
+type Generation {
+  id: Int!
+  generation: Int!
+  campus: CampusEnum!
+  inProgress: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  users: [User!]!
+}
+
+type Attendance {
+  id: Int!
+  userId: Int!
+  checkIn: String!
+  checkOut: String
+  late: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  user: User!
+}
+
 type Token {
   token: String!
 }
 
 type Query {
+  findAllGenerations: [Generation!]!
+  findAllUsers(campus: CampusEnum!, generation: Int!): [User!]!
+  findOneUser(id: Int!): User!
   profile: Admin!
   adminTest: Admin!
 }
 
 type Mutation {
+  generateAttendance(attendanceInput: AttendanceInput!): User!
+  createGeneration(createGenerationInput: CreateGenerationInput!): Generation!
+  updateGeneration(updateGenerationInput: UpdateGenerationInput!): Generation!
   createUser(createUserInput: CreateUserInput!): User!
+  testFindUsers(campus: CampusEnum!, generation: Int!): [User!]!
+  updateUser(updateUserInput: UpdateUserInput!): User!
   login(email: String!, password: String!): Token!
+}
+
+input AttendanceInput {
+  enrollment: String!
+}
+
+input CreateGenerationInput {
+  generation: Int!
+  inProgress: Boolean!
+  campus: CampusEnum!
+}
+
+input UpdateGenerationInput {
+  generation: Int
+  inProgress: Boolean
+  campus: CampusEnum
+  id: Int!
 }
 
 input CreateUserInput {
@@ -67,6 +111,16 @@ input CreateUserInput {
   password: String!
   enrollment: String!
   phone: String
+  generationId: Int!
   campus: CampusEnum!
-  role: UserTypeEnum!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  email: String
+  password: String
+  phone: String
+  generationId: Int
+  id: Int!
 }

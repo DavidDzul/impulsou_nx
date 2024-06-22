@@ -1,13 +1,14 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import {
   IsEmail,
   IsEnum,
+  IsNumber,
   IsOptional,
   IsString,
   Length,
   MinLength,
 } from 'class-validator';
-import { UserTypeEnum, CampusEnum } from '@impulsou/models';
+import { CampusEnum } from '@impulsou/models';
 
 @InputType()
 export class CreateUserInput {
@@ -39,13 +40,12 @@ export class CreateUserInput {
   @Length(13, 13)
   phone?: string;
 
+  @Field(() => Int)
+  @IsNumber()
+  generationId: number;
+
   @Field(() => CampusEnum)
   @IsOptional()
   @IsEnum(CampusEnum)
   campus: CampusEnum;
-
-  @Field(() => UserTypeEnum)
-  @IsOptional()
-  @IsEnum(UserTypeEnum)
-  role: UserTypeEnum;
 }

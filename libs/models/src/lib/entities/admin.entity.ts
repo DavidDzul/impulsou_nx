@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
+import { CampusEnum } from './campus.entity';
 
 export enum RoleEnum {
   ADMIN = 'ADMIN',
@@ -51,6 +52,10 @@ export class Admin {
     nullable: true,
   })
   role?: RoleEnum;
+
+  @Column({ type: 'enum', enum: CampusEnum })
+  @Field(() => CampusEnum)
+  campus: CampusEnum;
 
   @CreateDateColumn()
   @Field()

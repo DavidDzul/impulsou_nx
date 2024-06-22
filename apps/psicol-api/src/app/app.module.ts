@@ -9,8 +9,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { GenerationModule } from './generation/generation.module';
+import { AttendanceModule } from './attendance/attendance.module';
 
-export const PsicoModules = [AuthModule, UsersModule];
+export const PsicoModules = [
+  AuthModule,
+  UsersModule,
+  GenerationModule,
+  AttendanceModule,
+];
 
 @Module({
   imports: [
