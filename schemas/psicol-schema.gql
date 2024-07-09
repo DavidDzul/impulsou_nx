@@ -13,10 +13,15 @@ type User {
   active: Boolean!
   campus: CampusEnum!
   generationId: Float
+  role: RoleUser!
   createdAt: String!
   updatedAt: String!
   generation: Generation
-  attendance: Attendance!
+  attendances: Attendance
+  photos: [Photo!]
+  constancy: [Constancy!]
+  attendanceMap(date: String!): [Attendance!]
+  images: [Photo!]!
 }
 
 enum CampusEnum {
@@ -24,6 +29,11 @@ enum CampusEnum {
   VALLADOLID
   TIZIMIN
   OXKUTZCAB
+}
+
+enum RoleUser {
+  STUDENT
+  GRADUATE
 }
 
 type Admin {
@@ -59,36 +69,99 @@ type Attendance {
   userId: Int!
   checkIn: String!
   checkOut: String
-  late: Boolean!
+  delay: Boolean!
+  justifiedDelay: Boolean!
+  justifiedAbsence: Boolean!
+  reason: ReasonEmun
+  descripcion: String
   createdAt: String!
   updatedAt: String!
   user: User!
+  userAttendance: User
+}
+
+enum ReasonEmun {
+  ACADEMIC
+  PERSONAL
+  OTHER
+}
+
+type Photo {
+  id: Int!
+  userId: Int!
+  url: String!
+  admin: Boolean!
+  createdAt: String!
+}
+
+type Constancy {
+  id: Int!
+  name: String!
+  userId: Int!
+  url: String!
+  fileId: String!
+  startDate: String!
+  endDate: String!
+  createdAt: String!
 }
 
 type Token {
   token: String!
 }
 
+type SuccessMessage {
+  message: String!
+}
+
 type Query {
   findAllGenerations: [Generation!]!
-  findAllUsers(campus: CampusEnum!, generation: Int!): [User!]!
+  findAllUsers: [User!]!
   findOneUser(id: Int!): User!
   profile: Admin!
-  adminTest: Admin!
 }
 
 type Mutation {
+  createConstancy(userId: Int!, recordFile: Upload!, startDate: String!, endDate: String!): Constancy!
+  createPhoto(userId: Int!, photo: Upload!): Photo!
+  removePhoto(id: Int, userId: Int!): SuccessMessage!
   generateAttendance(attendanceInput: AttendanceInput!): User!
+  createAttendance(createAttendanceInput: CreateAttendanceInput!): Attendance!
+  updateAttendance(updateAttendanceInput: UpdateAttendanceInput!): Attendance!
+  findAttendanceUsers(campus: CampusEnum!, generation: Int!, date: String!): [Attendance!]!
   createGeneration(createGenerationInput: CreateGenerationInput!): Generation!
   updateGeneration(updateGenerationInput: UpdateGenerationInput!): Generation!
   createUser(createUserInput: CreateUserInput!): User!
-  testFindUsers(campus: CampusEnum!, generation: Int!): [User!]!
+  searchAllUsers(campus: CampusEnum!, generation: Int!, date: String): [User!]!
   updateUser(updateUserInput: UpdateUserInput!): User!
   login(email: String!, password: String!): Token!
 }
 
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
 input AttendanceInput {
   enrollment: String!
+}
+
+input CreateAttendanceInput {
+  userId: Int!
+  date: String!
+  delay: Boolean!
+  justifiedDelay: Boolean!
+  justifiedAbsence: Boolean!
+  reason: ReasonEmun
+  descripcion: String
+}
+
+input UpdateAttendanceInput {
+  userId: Int
+  date: String
+  delay: Boolean
+  justifiedDelay: Boolean
+  justifiedAbsence: Boolean
+  reason: ReasonEmun
+  descripcion: String
+  id: Int!
 }
 
 input CreateGenerationInput {
@@ -113,6 +186,7 @@ input CreateUserInput {
   phone: String
   generationId: Int!
   campus: CampusEnum!
+  role: RoleUser!
 }
 
 input UpdateUserInput {
@@ -122,5 +196,6 @@ input UpdateUserInput {
   password: String
   phone: String
   generationId: Int
+  role: RoleUser
   id: Int!
 }

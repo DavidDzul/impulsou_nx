@@ -5,6 +5,7 @@ import {
   CampusEnum,
   BadRequestError,
   User,
+  ReasonEmun,
 } from '@impulsou/models';
 import {
   BadRequestException,
@@ -14,11 +15,23 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import dayjs from 'dayjs';
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Int,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { AttendanceDbService, UsersDbService } from '@impulsou/services';
 import { CurrentUser, GqlAuthGuard } from '@impulsou/shared';
 
-import { AttendanceInput } from './dto';
+import {
+  AttendanceInput,
+  CreateAttendanceInput,
+  UpdateAttendanceInput,
+} from './dto';
 import { Between, EntityNotFoundError } from 'typeorm';
 
 @Resolver(() => Attendance)
@@ -63,7 +76,7 @@ export class AttendanceResolver {
         await this.attendanceDbService.create({
           userId: user.id,
           checkIn: date,
-          late: isLate,
+          delay: isLate,
         });
       } else {
         this.logger.log(`Attendance FOUND with user id:  ${user.id}. `);
@@ -87,5 +100,126 @@ export class AttendanceResolver {
         message: InternalServerError.SERVER,
       });
     }
+  }
+
+  @Mutation(() => Attendance)
+  @UseGuards(GqlAuthGuard)
+  async createAttendance(
+    @Args('createAttendanceInput') createAttendanceInput: CreateAttendanceInput
+  ) {
+    try {
+      this.logger.log(
+        `create attendance with user id ${createAttendanceInput.userId}.`
+      );
+
+      const currentDate = dayjs(createAttendanceInput.date);
+      const startOfDay = currentDate
+        .startOf('day')
+        .add(1, 'second')
+        .format('YYYY-MM-DD HH:mm:ss');
+      const endOfDay = currentDate.endOf('day').format('YYYY-MM-DD HH:mm:ss');
+
+      const attendance = await this.attendanceDbService.create({
+        ...createAttendanceInput,
+        checkIn: startOfDay,
+        checkOut: endOfDay,
+      });
+
+      return attendance;
+    } catch (e) {
+      if (e instanceof EntityNotFoundError) {
+        this.logger.log('Error creating attendance. Id not founded.');
+        throw new NotFoundException({
+          status: 404,
+          message: NotFoundError.USER,
+        });
+      }
+      this.logger.error('Error finding user.', e);
+      throw new InternalServerErrorException({
+        status: 500,
+        message: InternalServerError.SERVER,
+      });
+    }
+  }
+
+  @Mutation(() => Attendance)
+  @UseGuards(GqlAuthGuard)
+  async updateAttendance(
+    @Args('updateAttendanceInput') updateAttendanceInput: UpdateAttendanceInput
+  ) {
+    try {
+      this.logger.log(
+        `Finding attendance with id: ${updateAttendanceInput.id}.`
+      );
+      const attendance = await this.attendanceDbService.findOne({
+        where: { id: updateAttendanceInput.id },
+      });
+      this.logger.log(
+        `Updating attendance with id: ${updateAttendanceInput.id}.`
+      );
+      return await this.attendanceDbService.update(
+        {
+          ...updateAttendanceInput,
+          descripcion:
+            updateAttendanceInput.reason === ReasonEmun.OTHER
+              ? null
+              : updateAttendanceInput.descripcion,
+        },
+        attendance
+      );
+    } catch (e) {
+      if (e instanceof EntityNotFoundError) {
+        this.logger.log('Error finding user. Id not founded.');
+        throw new NotFoundException({
+          status: 404,
+          message: NotFoundError.ATTENDANCE,
+        });
+      }
+      this.logger.error('Error finding user.', e);
+      throw new InternalServerErrorException({
+        status: 500,
+        message: InternalServerError.SERVER,
+      });
+    }
+  }
+
+  @Mutation(() => [Attendance])
+  @UseGuards(GqlAuthGuard)
+  async findAttendanceUsers(
+    @Args('campus', { type: () => CampusEnum }) campus: CampusEnum,
+    @Args('generation', { type: () => Int }) generation: number,
+    @Args('date', { type: () => String }) date: string
+  ) {
+    try {
+      this.logger.log('Finding all attendance by campus and generation.');
+      const currentDate = dayjs(date);
+      const startOfDay = currentDate
+        .startOf('day')
+        .add(1, 'second')
+        .format('YYYY-MM-DD HH:mm:ss');
+      const endOfDay = currentDate.endOf('day').format('YYYY-MM-DD HH:mm:ss');
+      const attendance = await this.attendanceDbService.getAttendanceByDate(
+        campus,
+        generation,
+        startOfDay,
+        endOfDay
+      );
+      return attendance;
+    } catch (e) {
+      this.logger.error('Error finding all attendance-db.', e);
+      throw new InternalServerErrorException({
+        status: 500,
+        message: InternalServerError.SERVER,
+      });
+    }
+  }
+
+  @ResolveField(() => User, { nullable: true })
+  async userAttendance(@Parent() attendance: Attendance) {
+    const userId = attendance.userId;
+    const user = await this.usersDbService.findOne({
+      where: { id: userId },
+    });
+    return user;
   }
 }

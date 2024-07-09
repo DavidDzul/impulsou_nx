@@ -14,7 +14,16 @@ import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 
 import { CampusEnum } from './campus.entity';
-import { Generation, Attendance } from './';
+import { Generation, Attendance, Photo, Constancy } from './';
+
+export enum RoleUser {
+  STUDENT = 'STUDENT',
+  GRADUATE = 'GRADUATE',
+}
+
+registerEnumType(RoleUser, {
+  name: 'RoleUser',
+});
 
 @ObjectType()
 @Entity('users')
@@ -61,6 +70,10 @@ export class User {
   @Field({ nullable: true })
   generationId: number;
 
+  @Column({ type: 'enum', enum: RoleUser })
+  @Field(() => RoleUser)
+  role: RoleUser;
+
   @CreateDateColumn()
   @Field()
   createdAt: string;
@@ -75,8 +88,16 @@ export class User {
   generation: Generation;
 
   @OneToMany(() => Attendance, (att) => att.user)
-  @Field(() => Attendance)
-  attendance: Attendance;
+  @Field(() => Attendance, { nullable: true })
+  attendances: Attendance;
+
+  @OneToMany(() => Photo, (photo) => photo.user)
+  @Field(() => [Photo], { nullable: true })
+  photos: Photo[];
+
+  @OneToMany(() => Constancy, (constancy) => constancy.user)
+  @Field(() => [Constancy], { nullable: true })
+  constancy: Constancy[];
 
   @BeforeInsert()
   @BeforeUpdate()

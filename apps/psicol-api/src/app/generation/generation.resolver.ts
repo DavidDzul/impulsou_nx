@@ -3,6 +3,7 @@ import {
   User,
   InternalServerError,
   NotFoundError,
+  Admin,
 } from '@impulsou/models';
 import {
   InternalServerErrorException,
@@ -24,10 +25,12 @@ export class GenerationResolver {
 
   @Query(() => [Generation])
   @UseGuards(GqlAuthGuard)
-  async findAllGenerations(@CurrentUser() user: User) {
+  async findAllGenerations(@CurrentUser() admin: Admin) {
     try {
       this.logger.log('Finding all generations-db.');
-      const data = await this.generationDbService.findAll();
+      const data = await this.generationDbService.findAll({
+        where: { campus: admin.campus },
+      });
       return data;
     } catch (e) {
       this.logger.error('Error finding all users-db.', e);
@@ -41,7 +44,7 @@ export class GenerationResolver {
   @Mutation(() => Generation)
   @UseGuards(GqlAuthGuard)
   async createGeneration(
-    @CurrentUser() user: User,
+    @CurrentUser() admin: Admin,
     @Args('createGenerationInput') createGenerationInput: CreateGenerationInput
   ) {
     try {

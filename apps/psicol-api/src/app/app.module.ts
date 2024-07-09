@@ -11,12 +11,18 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { GenerationModule } from './generation/generation.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { PhotosModule } from './photos/photos.module';
+import { FilesModule } from './files/files.module';
+import { ConstancyModule } from './constancy/constancy.module';
 
 export const PsicoModules = [
   AuthModule,
   UsersModule,
   GenerationModule,
   AttendanceModule,
+  PhotosModule,
+  FilesModule,
+  ConstancyModule,
 ];
 
 @Module({

@@ -5,6 +5,9 @@ import {
   NotFoundError,
   CampusEnum,
   BadRequestError,
+  Attendance,
+  RoleUser,
+  Photo,
 } from '@impulsou/models';
 import {
   BadRequestException,
@@ -13,24 +16,38 @@ import {
   NotFoundException,
   UseGuards,
 } from '@nestjs/common';
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { UsersDbService } from '@impulsou/services';
+import {
+  Args,
+  Int,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
+import {
+  UsersDbService,
+  AttendanceDbService,
+  PhotosDbService,
+} from '@impulsou/services';
 import { CurrentUser, GqlAuthGuard } from '@impulsou/shared';
 
 import { CreateUserInput, UpdateUserInput } from './dto';
-import { EntityNotFoundError } from 'typeorm';
+import { Between, EntityNotFoundError } from 'typeorm';
+import dayjs from 'dayjs';
 
 @Resolver(() => User)
 export class UsersResolver {
   private readonly logger = new Logger(UsersResolver.name);
-  constructor(private readonly usersDbService: UsersDbService) {}
+  constructor(
+    private readonly usersDbService: UsersDbService,
+    private readonly attendanceDbService: AttendanceDbService,
+    private readonly photosDbService: PhotosDbService
+  ) {}
 
   @Mutation(() => User)
   @UseGuards(GqlAuthGuard)
-  async createUser(
-    @CurrentUser() user: User,
-    @Args('createUserInput') createUserInput: CreateUserInput
-  ) {
+  async createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
     try {
       if (
         await this.usersDbService.findOne(
@@ -61,6 +78,7 @@ export class UsersResolver {
       this.logger.log('Create user');
       const retunUser = await this.usersDbService.create({
         ...createUserInput,
+        role: RoleUser.STUDENT,
       });
       return retunUser;
     } catch (e) {
@@ -81,14 +99,12 @@ export class UsersResolver {
 
   @Query(() => [User])
   @UseGuards(GqlAuthGuard)
-  async findAllUsers(
-    @Args('campus', { type: () => CampusEnum }) campus: CampusEnum,
-    @Args('generation', { type: () => Int }) generation: number
-  ) {
+  async findAllUsers(@CurrentUser() admin: Admin) {
     try {
+      const { campus } = admin;
       this.logger.log('Finding all users-db.');
       const allUsers = await this.usersDbService.findAll({
-        where: { campus, generationId: generation },
+        where: { campus, role: RoleUser.STUDENT },
       });
       return allUsers;
     } catch (e) {
@@ -102,9 +118,10 @@ export class UsersResolver {
 
   @Mutation(() => [User])
   @UseGuards(GqlAuthGuard)
-  async testFindUsers(
+  async searchAllUsers(
     @Args('campus', { type: () => CampusEnum }) campus: CampusEnum,
-    @Args('generation', { type: () => Int }) generation: number
+    @Args('generation', { type: () => Int }) generation: number,
+    @Args('date', { type: () => String, nullable: true }) date?: string
   ) {
     try {
       this.logger.log('Finding all users-db.');
@@ -122,6 +139,7 @@ export class UsersResolver {
   }
 
   @Query(() => User)
+  @UseGuards(GqlAuthGuard)
   async findOneUser(@Args('id', { type: () => Int }) id: number) {
     try {
       this.logger.log(`Finding user with id: ${id}.`);
@@ -143,6 +161,7 @@ export class UsersResolver {
   }
 
   @Mutation(() => User)
+  @UseGuards(GqlAuthGuard)
   async updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
     try {
       this.logger.log(`Finding user with id: ${updateUserInput.id}.`);
@@ -165,5 +184,30 @@ export class UsersResolver {
         message: InternalServerError.SERVER,
       });
     }
+  }
+
+  @ResolveField(() => [Attendance], { nullable: true })
+  async attendanceMap(@Parent() user: User, @Args('date') date: string) {
+    const userId = user.id;
+
+    const currentDate = dayjs(date);
+    const startOfMonth = currentDate
+      .startOf('month')
+      .format('YYYY-MM-DD HH:mm:ss');
+    const endOfMonth = currentDate.endOf('month').format('YYYY-MM-DD HH:mm:ss');
+
+    const attendanceData = await this.attendanceDbService.findAll({
+      where: { userId, checkIn: Between(startOfMonth, endOfMonth) },
+    });
+    return attendanceData || null;
+  }
+
+  @ResolveField(() => [Photo])
+  async images(@Parent() user: User) {
+    const { id } = user;
+    return this.photosDbService.findAll({
+      where: { userId: id, admin: true },
+      order: { createdAt: 'DESC' },
+    });
   }
 }

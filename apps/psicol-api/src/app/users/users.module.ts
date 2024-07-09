@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
 import { UsersResolver } from './users.resolver';
-import { UsersDbModule } from '@impulsou/services';
+import {
+  UsersDbModule,
+  AttendanceDbModule,
+  PhotosDbModule,
+} from '@impulsou/services';
 
 @Module({
-  imports: [UsersDbModule],
+  imports: [UsersDbModule, AttendanceDbModule, PhotosDbModule],
   providers: [UsersResolver],
 })
 export class UsersModule {}

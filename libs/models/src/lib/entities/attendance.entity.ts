@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 
-import { CampusEnum } from './campus.entity';
+import { ReasonEmun } from './raeason-attendance.entity';
 import { User } from './';
 
 @ObjectType()
@@ -33,7 +33,23 @@ export class Attendance {
 
   @Column({ default: false })
   @Field()
-  late: boolean;
+  delay: boolean;
+
+  @Column({ default: false })
+  @Field()
+  justifiedDelay: boolean;
+
+  @Column({ default: false })
+  @Field()
+  justifiedAbsence: boolean;
+
+  @Column({ type: 'enum', enum: ReasonEmun, nullable: true })
+  @Field(() => ReasonEmun, { nullable: true })
+  reason?: ReasonEmun;
+
+  @Column({ type: 'nvarchar', length: '10000' })
+  @Field({ nullable: true })
+  descripcion: string;
 
   @CreateDateColumn()
   @Field()
@@ -44,7 +60,7 @@ export class Attendance {
   updatedAt: string;
 
   /* Relationships */
-  @ManyToOne(() => User, (user) => user.attendance)
+  @ManyToOne(() => User, (user) => user.attendances)
   @Field(() => User)
   user: User;
 }

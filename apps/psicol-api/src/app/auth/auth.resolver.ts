@@ -16,16 +16,11 @@ export class AuthResolver {
 
   @Query(() => Admin)
   @UseGuards(GqlAuthGuard)
-  profile(@CurrentUser('user') user: Admin) {
-    this.logger.log(`Admin with email: ${user.email} connected.`);
-    return this.adminDbService.findOne({
-      where: { id: user.id, role: RoleEnum.PSICOL },
+  async profile(@CurrentUser() admin: Admin) {
+    this.logger.log(`Admin with email: ${admin.email} connected.`);
+    return await this.adminDbService.findOne({
+      where: { id: admin.id, role: RoleEnum.PSICOL },
     });
-  }
-
-  @Query(() => Admin)
-  adminTest() {
-    return this.adminDbService.findOne({ where: { id: 1 } });
   }
 
   @Mutation(() => Token)

@@ -8,7 +8,7 @@ import {
   Length,
   MinLength,
 } from 'class-validator';
-import { CampusEnum } from '@impulsou/models';
+import { CampusEnum, RoleUser } from '@impulsou/models';
 
 @InputType()
 export class CreateUserInput {
@@ -48,4 +48,8 @@ export class CreateUserInput {
   @IsOptional()
   @IsEnum(CampusEnum)
   campus: CampusEnum;
+
+  @Field(() => RoleUser)
+  @IsEnum(RoleUser)
+  role: RoleUser;
 }

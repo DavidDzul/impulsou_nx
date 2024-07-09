@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthDbService } from './auth-db.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { JwtStrategy, LocalStrategy } from './strategies/';
+import { LocalStrategy } from './strategies/';
 import { PassportModule } from '@nestjs/passport';
 import { AdminDbModule } from '../admin-db';
 @Module({
@@ -23,7 +23,7 @@ import { AdminDbModule } from '../admin-db';
     PassportModule,
     AdminDbModule,
   ],
-  providers: [AuthDbService, LocalStrategy, JwtStrategy],
-  exports: [AuthDbService, JwtModule],
+  providers: [AuthDbService, LocalStrategy],
+  exports: [AuthDbService, JwtModule, LocalStrategy],
 })
 export class AuthDbModule {}
