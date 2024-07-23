@@ -8,6 +8,7 @@ import {
   Attendance,
   RoleUser,
   Photo,
+  Constancy,
 } from '@impulsou/models';
 import {
   BadRequestException,
@@ -29,6 +30,7 @@ import {
   UsersDbService,
   AttendanceDbService,
   PhotosDbService,
+  ConstancyDbService,
 } from '@impulsou/services';
 import { CurrentUser, GqlAuthGuard } from '@impulsou/shared';
 
@@ -42,8 +44,75 @@ export class UsersResolver {
   constructor(
     private readonly usersDbService: UsersDbService,
     private readonly attendanceDbService: AttendanceDbService,
-    private readonly photosDbService: PhotosDbService
+    private readonly photosDbService: PhotosDbService,
+    private readonly constancyDbService: ConstancyDbService
   ) {}
+
+  //SERVICIO PARA OBTENER POR GENERACIÓN Y SEDE A LOS USUARIOS, RELACIONADOS CON ALGUNA FECHA EN LAS OTRAS TABLAS
+  @Mutation(() => [User])
+  @UseGuards(GqlAuthGuard)
+  async searchAllUsers(
+    @Args('campus', { type: () => CampusEnum }) campus: CampusEnum,
+    @Args('generation', { type: () => Int }) generation: number,
+    @Args('date', { type: () => String, nullable: true }) date?: string
+  ) {
+    try {
+      this.logger.log('Finding all users-db.');
+      const allUsers = await this.usersDbService.findAll({
+        where: { campus, generationId: generation },
+      });
+      return allUsers;
+    } catch (e) {
+      this.logger.error('Error finding all users-db.', e);
+      throw new InternalServerErrorException({
+        status: 500,
+        message: InternalServerError.SERVER,
+      });
+    }
+  }
+
+  // PARA VER DETALLES DEL USUARIO
+  @Query(() => User)
+  @UseGuards(GqlAuthGuard)
+  async findOneUser(@Args('id', { type: () => Int }) id: number) {
+    try {
+      this.logger.log(`Finding user with id: ${id}.`);
+      return await this.usersDbService.findOne({ where: { id } });
+    } catch (e) {
+      if (e instanceof EntityNotFoundError) {
+        this.logger.log('Error finding user. Id not founded.');
+        throw new NotFoundException({
+          status: 404,
+          message: NotFoundError.USER,
+        });
+      }
+      this.logger.error('Error finding user.', e);
+      throw new InternalServerErrorException({
+        status: 500,
+        message: InternalServerError.SERVER,
+      });
+    }
+  }
+
+  // OBTENER TODOS LOS USUARIOS DE LA SEDE QUE SE ENCUENTRA LOGUEADA
+  @Query(() => [User])
+  @UseGuards(GqlAuthGuard)
+  async findAllUsers(@CurrentUser() admin: Admin) {
+    try {
+      const { campus } = admin;
+      this.logger.log('Finding all users-db.');
+      const allUsers = await this.usersDbService.findAll({
+        where: { campus, role: RoleUser.STUDENT },
+      });
+      return allUsers;
+    } catch (e) {
+      this.logger.error('Error finding all users-db.', e);
+      throw new InternalServerErrorException({
+        status: 500,
+        message: InternalServerError.SERVER,
+      });
+    }
+  }
 
   @Mutation(() => User)
   @UseGuards(GqlAuthGuard)
@@ -97,69 +166,6 @@ export class UsersResolver {
     }
   }
 
-  @Query(() => [User])
-  @UseGuards(GqlAuthGuard)
-  async findAllUsers(@CurrentUser() admin: Admin) {
-    try {
-      const { campus } = admin;
-      this.logger.log('Finding all users-db.');
-      const allUsers = await this.usersDbService.findAll({
-        where: { campus, role: RoleUser.STUDENT },
-      });
-      return allUsers;
-    } catch (e) {
-      this.logger.error('Error finding all users-db.', e);
-      throw new InternalServerErrorException({
-        status: 500,
-        message: InternalServerError.SERVER,
-      });
-    }
-  }
-
-  @Mutation(() => [User])
-  @UseGuards(GqlAuthGuard)
-  async searchAllUsers(
-    @Args('campus', { type: () => CampusEnum }) campus: CampusEnum,
-    @Args('generation', { type: () => Int }) generation: number,
-    @Args('date', { type: () => String, nullable: true }) date?: string
-  ) {
-    try {
-      this.logger.log('Finding all users-db.');
-      const allUsers = await this.usersDbService.findAll({
-        where: { campus, generationId: generation },
-      });
-      return allUsers;
-    } catch (e) {
-      this.logger.error('Error finding all users-db.', e);
-      throw new InternalServerErrorException({
-        status: 500,
-        message: InternalServerError.SERVER,
-      });
-    }
-  }
-
-  @Query(() => User)
-  @UseGuards(GqlAuthGuard)
-  async findOneUser(@Args('id', { type: () => Int }) id: number) {
-    try {
-      this.logger.log(`Finding user with id: ${id}.`);
-      return await this.usersDbService.findOne({ where: { id } });
-    } catch (e) {
-      if (e instanceof EntityNotFoundError) {
-        this.logger.log('Error finding user. Id not founded.');
-        throw new NotFoundException({
-          status: 404,
-          message: NotFoundError.USER,
-        });
-      }
-      this.logger.error('Error finding user.', e);
-      throw new InternalServerErrorException({
-        status: 500,
-        message: InternalServerError.SERVER,
-      });
-    }
-  }
-
   @Mutation(() => User)
   @UseGuards(GqlAuthGuard)
   async updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
@@ -186,18 +192,15 @@ export class UsersResolver {
     }
   }
 
+  //Resolvers
   @ResolveField(() => [Attendance], { nullable: true })
   async attendanceMap(@Parent() user: User, @Args('date') date: string) {
     const userId = user.id;
-
     const currentDate = dayjs(date);
-    const startOfMonth = currentDate
-      .startOf('month')
-      .format('YYYY-MM-DD HH:mm:ss');
-    const endOfMonth = currentDate.endOf('month').format('YYYY-MM-DD HH:mm:ss');
-
+    const startOfMonth = currentDate.startOf('month').format('YYYY-MM-DD');
+    const endOfMonth = currentDate.endOf('month').format('YYYY-MM-DD');
     const attendanceData = await this.attendanceDbService.findAll({
-      where: { userId, checkIn: Between(startOfMonth, endOfMonth) },
+      where: { userId, recordDate: Between(startOfMonth, endOfMonth) },
     });
     return attendanceData || null;
   }
@@ -209,5 +212,24 @@ export class UsersResolver {
       where: { userId: id, admin: true },
       order: { createdAt: 'DESC' },
     });
+  }
+
+  @ResolveField(() => [Constancy])
+  async documents(@Parent() user: User) {
+    const { id } = user;
+    return this.constancyDbService.findAll({
+      where: { userId: id },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  @ResolveField(() => Constancy, { nullable: true })
+  async lastConstancy(@Parent() user: User) {
+    const { id } = user;
+    const document = await this.constancyDbService.findOne(
+      { where: { userId: id }, order: { createdAt: 'DESC' } },
+      false
+    );
+    return document || null;
   }
 }

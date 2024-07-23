@@ -56,16 +56,12 @@ export class AttendanceResolver {
       });
       this.logger.log('user found');
       const currentDate = dayjs();
-      const date = currentDate.format('YYYY-MM-DD HH:mm:ss');
-
-      const startOfDay = currentDate
-        .startOf('day')
-        .format('YYYY-MM-DD HH:mm:ss');
-      const endOfDay = currentDate.endOf('day').format('YYYY-MM-DD HH:mm:ss');
+      const time = currentDate.format('HH:mm:ss');
+      const date = currentDate.format('YYYY-MM-DD');
 
       this.logger.log(`find attendance with date ${date}.`);
       const findAttendance = await this.attendanceDbService.findOne(
-        { where: { userId: user.id, checkIn: Between(startOfDay, endOfDay) } },
+        { where: { userId: user.id, recordDate: date } },
         false
       );
 
@@ -75,13 +71,13 @@ export class AttendanceResolver {
         const isLate = currentDate.isAfter(lateThreshold);
         await this.attendanceDbService.create({
           userId: user.id,
-          checkIn: date,
+          checkIn: time,
           delay: isLate,
         });
       } else {
         this.logger.log(`Attendance FOUND with user id:  ${user.id}. `);
         await this.attendanceDbService.update(
-          { checkOut: date },
+          { checkOut: time },
           findAttendance
         );
       }
@@ -111,20 +107,14 @@ export class AttendanceResolver {
       this.logger.log(
         `create attendance with user id ${createAttendanceInput.userId}.`
       );
-
       const currentDate = dayjs(createAttendanceInput.date);
-      const startOfDay = currentDate
-        .startOf('day')
-        .add(1, 'second')
-        .format('YYYY-MM-DD HH:mm:ss');
-      const endOfDay = currentDate.endOf('day').format('YYYY-MM-DD HH:mm:ss');
-
+      const date = currentDate.format('YYYY-MM-DD');
       const attendance = await this.attendanceDbService.create({
         ...createAttendanceInput,
-        checkIn: startOfDay,
-        checkOut: endOfDay,
+        recordDate: date,
+        checkIn: '00:00:00',
+        checkOut: '00:00:00',
       });
-
       return attendance;
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
@@ -158,13 +148,7 @@ export class AttendanceResolver {
         `Updating attendance with id: ${updateAttendanceInput.id}.`
       );
       return await this.attendanceDbService.update(
-        {
-          ...updateAttendanceInput,
-          descripcion:
-            updateAttendanceInput.reason === ReasonEmun.OTHER
-              ? null
-              : updateAttendanceInput.descripcion,
-        },
+        { ...updateAttendanceInput },
         attendance
       );
     } catch (e) {
@@ -193,16 +177,11 @@ export class AttendanceResolver {
     try {
       this.logger.log('Finding all attendance by campus and generation.');
       const currentDate = dayjs(date);
-      const startOfDay = currentDate
-        .startOf('day')
-        .add(1, 'second')
-        .format('YYYY-MM-DD HH:mm:ss');
-      const endOfDay = currentDate.endOf('day').format('YYYY-MM-DD HH:mm:ss');
+      const seatchDate = currentDate.format('YYYY-MM-DD');
       const attendance = await this.attendanceDbService.getAttendanceByDate(
         campus,
         generation,
-        startOfDay,
-        endOfDay
+        seatchDate
       );
       return attendance;
     } catch (e) {
@@ -214,7 +193,7 @@ export class AttendanceResolver {
     }
   }
 
-  @ResolveField(() => User, { nullable: true })
+  @ResolveField(() => User)
   async userAttendance(@Parent() attendance: Attendance) {
     const userId = attendance.userId;
     const user = await this.usersDbService.findOne({

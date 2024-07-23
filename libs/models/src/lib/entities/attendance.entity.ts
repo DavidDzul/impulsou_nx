@@ -23,13 +23,17 @@ export class Attendance {
   @Field(() => Int)
   userId: number;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'time' })
   @Field()
   checkIn: string;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'time', nullable: true })
   @Field({ nullable: true })
   checkOut: string;
+
+  @Column({ type: 'date' })
+  @Field()
+  recordDate: string;
 
   @Column({ default: false })
   @Field()

@@ -59,21 +59,19 @@ export class ConstancyResolver {
     }
   }
 
-  //   @Mutation(() => SuccessMessage)
-  //   async removePhoto(
-  //     @Args({ name: 'id', type: () => Int, nullable: true })
-  //     id: number,
-  //     @Args({ name: 'userId', type: () => Int })
-  //     userId: number
-  //   ) {
-  //     try {
-  //       const photo = await this.photosDbService.findOne({ where: { id } });
-  //       this.s3Service.deleteFile(photo.url).then().catch();
-  //       await this.photosDbService.remove(photo);
-  //       return { message: 'Foto eliminada exitosamente' };
-  //     } catch (e) {
-  //       this.logger.error(e);
-  //       throw new InternalServerErrorException();
-  //     }
-  //   }
+  @Mutation(() => SuccessMessage)
+  async removeConstancy(
+    @Args({ name: 'id', type: () => Int })
+    id: number
+  ) {
+    try {
+      const document = await this.constancyDbService.findOne({ where: { id } });
+      this.s3Service.deleteFile(document.url).then().catch();
+      await this.constancyDbService.remove(document);
+      return { message: 'Constancia de estudios eliminada exitosamente' };
+    } catch (e) {
+      this.logger.error(e);
+      throw new InternalServerErrorException();
+    }
+  }
 }

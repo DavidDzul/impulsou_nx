@@ -22,6 +22,8 @@ type User {
   constancy: [Constancy!]
   attendanceMap(date: String!): [Attendance!]
   images: [Photo!]!
+  documents: [Constancy!]!
+  lastConstancy: Constancy
 }
 
 enum CampusEnum {
@@ -69,6 +71,7 @@ type Attendance {
   userId: Int!
   checkIn: String!
   checkOut: String
+  recordDate: String!
   delay: Boolean!
   justifiedDelay: Boolean!
   justifiedAbsence: Boolean!
@@ -77,7 +80,7 @@ type Attendance {
   createdAt: String!
   updatedAt: String!
   user: User!
-  userAttendance: User
+  userAttendance: User!
 }
 
 enum ReasonEmun {
@@ -115,13 +118,14 @@ type SuccessMessage {
 
 type Query {
   findAllGenerations: [Generation!]!
-  findAllUsers: [User!]!
   findOneUser(id: Int!): User!
+  findAllUsers: [User!]!
   profile: Admin!
 }
 
 type Mutation {
   createConstancy(userId: Int!, recordFile: Upload!, startDate: String!, endDate: String!): Constancy!
+  removeConstancy(id: Int!): SuccessMessage!
   createPhoto(userId: Int!, photo: Upload!): Photo!
   removePhoto(id: Int, userId: Int!): SuccessMessage!
   generateAttendance(attendanceInput: AttendanceInput!): User!
@@ -130,8 +134,8 @@ type Mutation {
   findAttendanceUsers(campus: CampusEnum!, generation: Int!, date: String!): [Attendance!]!
   createGeneration(createGenerationInput: CreateGenerationInput!): Generation!
   updateGeneration(updateGenerationInput: UpdateGenerationInput!): Generation!
-  createUser(createUserInput: CreateUserInput!): User!
   searchAllUsers(campus: CampusEnum!, generation: Int!, date: String): [User!]!
+  createUser(createUserInput: CreateUserInput!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
   login(email: String!, password: String!): Token!
 }
