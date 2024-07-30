@@ -4,17 +4,12 @@ import { Field, InputType, Int, OmitType, PartialType } from '@nestjs/graphql';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 // Dto's
-import { CreateUserInput } from './create-user.input';
+import { CreateAutorizationInput } from './create-autorization.input';
 
 @InputType()
-export class UpdateUserInput extends PartialType(
-  OmitType(CreateUserInput, ['enrollment', 'campus'] as const)
+export class UpdateAutorizationInput extends PartialType(
+  CreateAutorizationInput
 ) {
   @Field(() => Int)
   id: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  active?: boolean;
 }

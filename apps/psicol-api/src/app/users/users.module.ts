@@ -5,6 +5,7 @@ import {
   AttendanceDbModule,
   PhotosDbModule,
   ConstancyDbModule,
+  AutorizationDbModule,
 } from '@impulsou/services';
 
 @Module({
@@ -13,6 +14,7 @@ import {
     AttendanceDbModule,
     PhotosDbModule,
     ConstancyDbModule,
+    AutorizationDbModule,
   ],
   providers: [UsersResolver],
 })

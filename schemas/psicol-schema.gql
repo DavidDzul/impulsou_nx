@@ -20,10 +20,12 @@ type User {
   attendances: Attendance
   photos: [Photo!]
   constancy: [Constancy!]
+  autorization: [Autorization!]
   attendanceMap(date: String!): [Attendance!]
   images: [Photo!]!
   documents: [Constancy!]!
   lastConstancy: Constancy
+  autorizationMonth(date: String!): Autorization
 }
 
 enum CampusEnum {
@@ -108,6 +110,43 @@ type Constancy {
   createdAt: String!
 }
 
+type Autorization {
+  id: Int!
+  userId: Int!
+  status: StatusAutorizationEmun!
+  percentage: Int
+  previousPayment: Boolean!
+  numberMonths: Int
+  previousMonths: String
+  cause: CauseEmun
+  otherCause: String
+  date: String!
+  createdAt: String!
+  updatedAt: String!
+  user: User!
+}
+
+enum StatusAutorizationEmun {
+  ACTIVE
+  SUSPENDED
+  GRADUATE
+  DETAINED
+}
+
+enum CauseEmun {
+  FAULTS_FI
+  NOT_CONSTANCY
+  PROVISIONALES_GRADES
+  ORIGINAL_GRADES
+  LOW_AVERAGE
+  EXTRAORDINARY
+  PERSONAL_PROBLEMS_SCHOOL
+  VOCATIONAL_PROBLEMS_SCHOOL
+  MISSING
+  BREAK_RULES
+  OTHER
+}
+
 type Token {
   token: String!
 }
@@ -124,6 +163,7 @@ type Query {
 }
 
 type Mutation {
+  createAutorization(createAutorizationInput: CreateAutorizationInput!): Autorization!
   createConstancy(userId: Int!, recordFile: Upload!, startDate: String!, endDate: String!): Constancy!
   removeConstancy(id: Int!): SuccessMessage!
   createPhoto(userId: Int!, photo: Upload!): Photo!
@@ -138,6 +178,17 @@ type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
   login(email: String!, password: String!): Token!
+}
+
+input CreateAutorizationInput {
+  userId: Int!
+  percentage: Int!
+  status: StatusAutorizationEmun!
+  previousPayment: Boolean
+  numberMonths: Int
+  previousMonths: String
+  cause: CauseEmun
+  otherCause: String
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -202,4 +253,5 @@ input UpdateUserInput {
   generationId: Int
   role: RoleUser
   id: Int!
+  active: Boolean
 }

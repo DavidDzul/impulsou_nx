@@ -14,6 +14,7 @@ import { AttendanceModule } from './attendance/attendance.module';
 import { PhotosModule } from './photos/photos.module';
 import { FilesModule } from './files/files.module';
 import { ConstancyModule } from './constancy/constancy.module';
+import { AutorizationModule } from './autorization/autorization.module';
 
 export const PsicoModules = [
   AuthModule,
@@ -23,6 +24,7 @@ export const PsicoModules = [
   PhotosModule,
   FilesModule,
   ConstancyModule,
+  AutorizationModule,
 ];
 
 @Module({

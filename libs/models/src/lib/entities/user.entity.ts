@@ -14,7 +14,7 @@ import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 
 import { CampusEnum } from './campus.entity';
-import { Generation, Attendance, Photo, Constancy } from './';
+import { Generation, Attendance, Photo, Constancy, Autorization } from './';
 
 export enum RoleUser {
   STUDENT = 'STUDENT',
@@ -98,6 +98,10 @@ export class User {
   @OneToMany(() => Constancy, (constancy) => constancy.user)
   @Field(() => [Constancy], { nullable: true })
   constancy: Constancy[];
+
+  @OneToMany(() => Autorization, (autorization) => autorization.user)
+  @Field(() => [Autorization], { nullable: true })
+  autorization: Autorization[];
 
   @BeforeInsert()
   @BeforeUpdate()

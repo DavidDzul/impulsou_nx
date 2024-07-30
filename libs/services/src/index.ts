@@ -6,3 +6,4 @@ export * from './lib/generation-db';
 export * from './lib/attendance-db';
 export * from './lib/photo-db';
 export * from './lib/constancy-db';
+export * from './lib/autorization-db';

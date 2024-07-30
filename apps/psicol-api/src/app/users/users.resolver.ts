@@ -9,6 +9,7 @@ import {
   RoleUser,
   Photo,
   Constancy,
+  Autorization,
 } from '@impulsou/models';
 import {
   BadRequestException,
@@ -31,6 +32,7 @@ import {
   AttendanceDbService,
   PhotosDbService,
   ConstancyDbService,
+  AutorizationDbService,
 } from '@impulsou/services';
 import { CurrentUser, GqlAuthGuard } from '@impulsou/shared';
 
@@ -45,7 +47,8 @@ export class UsersResolver {
     private readonly usersDbService: UsersDbService,
     private readonly attendanceDbService: AttendanceDbService,
     private readonly photosDbService: PhotosDbService,
-    private readonly constancyDbService: ConstancyDbService
+    private readonly constancyDbService: ConstancyDbService,
+    private readonly autorizationDbService: AutorizationDbService
   ) {}
 
   //SERVICIO PARA OBTENER POR GENERACIÓN Y SEDE A LOS USUARIOS, RELACIONADOS CON ALGUNA FECHA EN LAS OTRAS TABLAS
@@ -231,5 +234,20 @@ export class UsersResolver {
       false
     );
     return document || null;
+  }
+
+  @ResolveField(() => Autorization, { nullable: true })
+  async autorizationMonth(@Parent() user: User, @Args('date') date: string) {
+    const userId = user.id;
+    const currentDate = dayjs(date);
+    const startOfMonth = currentDate.startOf('month').format('YYYY-MM-DD');
+    const endOfMonth = currentDate.endOf('month').format('YYYY-MM-DD');
+    const autorization = await this.autorizationDbService.findOne(
+      {
+        where: { userId, date: Between(startOfMonth, endOfMonth) },
+      },
+      false
+    );
+    return autorization || null;
   }
 }
