@@ -4,6 +4,7 @@ import {
   InternalServerError,
   NotFoundError,
   Admin,
+  CampusEnum,
 } from '@impulsou/models';
 import {
   InternalServerErrorException,
@@ -28,10 +29,12 @@ export class GenerationResolver {
   async findAllGenerations(@CurrentUser() admin: Admin) {
     try {
       this.logger.log('Finding all generations-db.');
-      const data = await this.generationDbService.findAll({
+      if (admin.campus === CampusEnum.MERIDA) {
+        return await this.generationDbService.findAll();
+      }
+      return await this.generationDbService.findAll({
         where: { campus: admin.campus },
       });
-      return data;
     } catch (e) {
       this.logger.error('Error finding all users-db.', e);
       throw new InternalServerErrorException({

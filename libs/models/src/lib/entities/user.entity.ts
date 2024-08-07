@@ -66,8 +66,8 @@ export class User {
   @Field(() => CampusEnum)
   campus: CampusEnum;
 
-  @Column({ nullable: true, unsigned: true })
-  @Field({ nullable: true })
+  @Column({ unsigned: true })
+  @Field(() => Int)
   generationId: number;
 
   @Column({ type: 'enum', enum: RoleUser })
@@ -84,7 +84,7 @@ export class User {
 
   /* Relationships */
   @ManyToOne(() => Generation, (generation) => generation.users)
-  @Field(() => Generation, { nullable: true })
+  @Field(() => Generation)
   generation: Generation;
 
   @OneToMany(() => Attendance, (att) => att.user)

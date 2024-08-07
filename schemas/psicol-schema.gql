@@ -12,16 +12,16 @@ type User {
   phone: String
   active: Boolean!
   campus: CampusEnum!
-  generationId: Float
+  generationId: Int!
   role: RoleUser!
   createdAt: String!
   updatedAt: String!
-  generation: Generation
+  generation: Generation!
   attendances: Attendance
   photos: [Photo!]
   constancy: [Constancy!]
   autorization: [Autorization!]
-  attendanceMap(date: String!): [Attendance!]
+  attendanceMap: [Attendance!]
   images: [Photo!]!
   documents: [Constancy!]!
   lastConstancy: Constancy
@@ -60,12 +60,13 @@ enum RoleEnum {
 
 type Generation {
   id: Int!
-  generation: Int!
+  entryName: Int!
   campus: CampusEnum!
   inProgress: Boolean!
   createdAt: String!
   updatedAt: String!
   users: [User!]!
+  calendar: [Calendar!]!
 }
 
 type Attendance {
@@ -147,6 +148,17 @@ enum CauseEmun {
   OTHER
 }
 
+type Calendar {
+  id: Int!
+  name: String!
+  generationId: Int!
+  date: String!
+  campus: CampusEnum!
+  createdAt: String!
+  updatedAt: String!
+  generation: Generation!
+}
+
 type Token {
   token: String!
 }
@@ -156,6 +168,7 @@ type SuccessMessage {
 }
 
 type Query {
+  findAllCalendar: [Calendar!]!
   findAllGenerations: [Generation!]!
   findOneUser(id: Int!): User!
   findAllUsers: [User!]!
@@ -163,6 +176,9 @@ type Query {
 }
 
 type Mutation {
+  createCalendar(createCalendarInput: CreateCalendarInput!): Calendar!
+  updateCalendar(updateCalendarInput: UpdateCalendarInput!): Calendar!
+  removeCalendar(id: Int!): SuccessMessage!
   createAutorization(createAutorizationInput: CreateAutorizationInput!): Autorization!
   createConstancy(userId: Int!, recordFile: Upload!, startDate: String!, endDate: String!): Constancy!
   removeConstancy(id: Int!): SuccessMessage!
@@ -178,6 +194,19 @@ type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
   login(email: String!, password: String!): Token!
+}
+
+input CreateCalendarInput {
+  name: String!
+  generationId: Int!
+  date: String!
+}
+
+input UpdateCalendarInput {
+  name: String
+  generationId: Int
+  date: String
+  id: Int!
 }
 
 input CreateAutorizationInput {
@@ -220,13 +249,13 @@ input UpdateAttendanceInput {
 }
 
 input CreateGenerationInput {
-  generation: Int!
+  entryName: Int!
   inProgress: Boolean!
   campus: CampusEnum!
 }
 
 input UpdateGenerationInput {
-  generation: Int
+  entryName: Int
   inProgress: Boolean
   campus: CampusEnum
   id: Int!

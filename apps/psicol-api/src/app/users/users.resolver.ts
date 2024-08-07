@@ -51,7 +51,7 @@ export class UsersResolver {
     private readonly autorizationDbService: AutorizationDbService
   ) {}
 
-  //SERVICIO PARA OBTENER POR GENERACIÓN Y SEDE A LOS USUARIOS, RELACIONADOS CON ALGUNA FECHA EN LAS OTRAS TABLAS
+  //SERVICIO PARA OBTENER POR GENERACIÓN Y SEDE A LOS USUARIOS EN TABLA DE USUARIOS Y TABLA DE AUTORIZACIÓN
   @Mutation(() => [User])
   @UseGuards(GqlAuthGuard)
   async searchAllUsers(
@@ -97,7 +97,7 @@ export class UsersResolver {
     }
   }
 
-  // OBTENER TODOS LOS USUARIOS DE LA SEDE QUE SE ENCUENTRA LOGUEADA
+  // OBTENER TODOS LOS USUARIOS DE LA SEDE PARA REGISTRAR ASISTENCIAS
   @Query(() => [User])
   @UseGuards(GqlAuthGuard)
   async findAllUsers(@CurrentUser() admin: Admin) {
@@ -197,13 +197,16 @@ export class UsersResolver {
 
   //Resolvers
   @ResolveField(() => [Attendance], { nullable: true })
-  async attendanceMap(@Parent() user: User, @Args('date') date: string) {
+  async attendanceMap(@Parent() user: User) {
     const userId = user.id;
-    const currentDate = dayjs(date);
-    const startOfMonth = currentDate.startOf('month').format('YYYY-MM-DD');
-    const endOfMonth = currentDate.endOf('month').format('YYYY-MM-DD');
+    const currentDate = dayjs();
+    const startYear =
+      currentDate.month() >= 7 ? currentDate.year() : currentDate.year() - 1;
+    const endYear = startYear + 1;
+    const startDate = dayjs(`${startYear}-08-01`).format('YYYY-MM-DD');
+    const endDate = dayjs(`${endYear}-07-31`).format('YYYY-MM-DD');
     const attendanceData = await this.attendanceDbService.findAll({
-      where: { userId, recordDate: Between(startOfMonth, endOfMonth) },
+      where: { userId, recordDate: Between(startDate, endDate) },
     });
     return attendanceData || null;
   }

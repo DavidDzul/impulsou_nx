@@ -3,26 +3,25 @@ import {
   IsBoolean,
   IsEmail,
   IsEnum,
+  IsISO8601,
   IsNumber,
   IsOptional,
   IsString,
   Length,
   MinLength,
 } from 'class-validator';
-import { CampusEnum } from '@impulsou/models';
 
 @InputType()
-export class CreateGenerationInput {
+export class CreateCalendarInput {
+  @Field()
+  @IsString()
+  name: string;
+
   @Field(() => Int)
   @IsNumber()
-  entryName: number;
+  generationId: number;
 
   @Field()
-  @IsBoolean()
-  inProgress: boolean;
-
-  @Field(() => CampusEnum)
-  @IsOptional()
-  @IsEnum(CampusEnum)
-  campus: CampusEnum;
+  @IsISO8601()
+  date: string;
 }

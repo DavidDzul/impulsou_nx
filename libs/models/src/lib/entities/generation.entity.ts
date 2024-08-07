@@ -9,7 +9,7 @@ import {
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 import { CampusEnum } from './campus.entity';
-import { User } from './';
+import { User, Calendar } from './';
 
 @ObjectType()
 @Entity('generations')
@@ -20,7 +20,7 @@ export class Generation {
 
   @Column()
   @Field(() => Int)
-  generation: number;
+  entryName: number;
 
   @Column({ type: 'enum', enum: CampusEnum })
   @Field(() => CampusEnum)
@@ -42,4 +42,8 @@ export class Generation {
   @OneToMany(() => User, (user) => user.generation)
   @Field(() => [User])
   users: User[];
+
+  @OneToMany(() => Calendar, (map) => map.generation)
+  @Field(() => [Calendar])
+  calendar: Calendar[];
 }

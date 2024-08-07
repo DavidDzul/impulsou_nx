@@ -5,6 +5,7 @@ import { Attendance } from './attendance.entity';
 import { Photo } from './photo.entity';
 import { Constancy } from './constancy.entity';
 import { Autorization } from './autorization.entity';
+import { Calendar } from './calendar.entity';
 
 export const typeOrmEntities = [
   User,
@@ -14,6 +15,7 @@ export const typeOrmEntities = [
   Photo,
   Constancy,
   Autorization,
+  Calendar,
 ];
 
 export * from './token.entity';
@@ -27,3 +29,4 @@ export * from './photo.entity';
 export * from './success-message.entity';
 export * from './constancy.entity';
 export * from './autorization.entity';
+export * from './calendar.entity';

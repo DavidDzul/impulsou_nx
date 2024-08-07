@@ -51,9 +51,9 @@ export class Attendance {
   @Field(() => ReasonEmun, { nullable: true })
   reason?: ReasonEmun;
 
-  @Column({ type: 'nvarchar', length: '10000' })
+  @Column({ type: 'nvarchar', length: '10000', nullable: true })
   @Field({ nullable: true })
-  descripcion: string;
+  descripcion?: string;
 
   @CreateDateColumn()
   @Field()
