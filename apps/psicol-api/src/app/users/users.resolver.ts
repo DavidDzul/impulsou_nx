@@ -203,8 +203,8 @@ export class UsersResolver {
     const startYear =
       currentDate.month() >= 7 ? currentDate.year() : currentDate.year() - 1;
     const endYear = startYear + 1;
-    const startDate = dayjs(`${startYear}-08-01`).format('YYYY-MM-DD');
-    const endDate = dayjs(`${endYear}-07-31`).format('YYYY-MM-DD');
+    const startDate = dayjs(`${startYear}-07-01`).format('YYYY-MM-DD');
+    const endDate = dayjs(`${endYear}-06-31`).format('YYYY-MM-DD');
     const attendanceData = await this.attendanceDbService.findAll({
       where: { userId, recordDate: Between(startDate, endDate) },
     });
@@ -239,18 +239,18 @@ export class UsersResolver {
     return document || null;
   }
 
-  @ResolveField(() => Autorization, { nullable: true })
+  @ResolveField(() => [Autorization], { nullable: true })
   async autorizationMonth(@Parent() user: User, @Args('date') date: string) {
     const userId = user.id;
-    const currentDate = dayjs(date);
-    const startOfMonth = currentDate.startOf('month').format('YYYY-MM-DD');
-    const endOfMonth = currentDate.endOf('month').format('YYYY-MM-DD');
-    const autorization = await this.autorizationDbService.findOne(
-      {
-        where: { userId, date: Between(startOfMonth, endOfMonth) },
-      },
-      false
-    );
+    const currentDate = dayjs();
+    const startYear =
+      currentDate.month() >= 7 ? currentDate.year() : currentDate.year() - 1;
+    const endYear = startYear + 1;
+    const startDate = dayjs(`${startYear}-07-01`).format('YYYY-MM-DD');
+    const endDate = dayjs(`${endYear}-06-31`).format('YYYY-MM-DD');
+    const autorization = await this.autorizationDbService.findAll({
+      where: { userId, date: Between(startDate, endDate) },
+    });
     return autorization || null;
   }
 }

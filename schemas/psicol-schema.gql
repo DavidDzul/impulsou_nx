@@ -25,7 +25,7 @@ type User {
   images: [Photo!]!
   documents: [Constancy!]!
   lastConstancy: Constancy
-  autorizationMonth(date: String!): Autorization
+  autorizationMonth(date: String!): [Autorization!]
 }
 
 enum CampusEnum {
