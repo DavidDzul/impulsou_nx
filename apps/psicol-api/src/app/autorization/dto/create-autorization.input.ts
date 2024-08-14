@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsEmail,
   IsEnum,
+  IsISO8601,
   IsNumber,
   IsOptional,
   IsString,
@@ -49,4 +50,8 @@ export class CreateAutorizationInput {
   @IsOptional()
   @IsString()
   otherCause?: string;
+
+  @Field()
+  @IsISO8601()
+  date: string;
 }

@@ -135,16 +135,16 @@ enum StatusAutorizationEmun {
 }
 
 enum CauseEmun {
-  FAULTS_FI
-  NOT_CONSTANCY
-  PROVISIONALES_GRADES
-  ORIGINAL_GRADES
-  LOW_AVERAGE
+  FAULTS
+  NOTCONSTANCY
+  PROVGRADES
+  ORIGRADES
+  LOWAVERAGE
   EXTRAORDINARY
-  PERSONAL_PROBLEMS_SCHOOL
-  VOCATIONAL_PROBLEMS_SCHOOL
+  PERSONALSCHOOL
+  VOCATIONALSCHOOL
   MISSING
-  BREAK_RULES
+  BREAKRULES
   OTHER
 }
 
@@ -180,6 +180,7 @@ type Mutation {
   updateCalendar(updateCalendarInput: UpdateCalendarInput!): Calendar!
   removeCalendar(id: Int!): SuccessMessage!
   createAutorization(createAutorizationInput: CreateAutorizationInput!): Autorization!
+  updateAutorization(updateAutorizationInput: UpdateAutorizationInput!): Autorization!
   createConstancy(userId: Int!, recordFile: Upload!, startDate: String!, endDate: String!): Constancy!
   removeConstancy(id: Int!): SuccessMessage!
   createPhoto(userId: Int!, photo: Upload!): Photo!
@@ -218,6 +219,20 @@ input CreateAutorizationInput {
   previousMonths: String
   cause: CauseEmun
   otherCause: String
+  date: String!
+}
+
+input UpdateAutorizationInput {
+  userId: Int
+  percentage: Int
+  status: StatusAutorizationEmun
+  previousPayment: Boolean
+  numberMonths: Int
+  previousMonths: String
+  cause: CauseEmun
+  otherCause: String
+  date: String
+  id: Int!
 }
 
 """The `Upload` scalar type represents a file upload."""
