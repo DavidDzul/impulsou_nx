@@ -3,9 +3,10 @@ import { Admin } from './admin.entity';
 import { Generation } from './generation.entity';
 import { Attendance } from './attendance.entity';
 import { Photo } from './photo.entity';
-import { Constancy } from './constancy.entity';
+import { UserCertificate } from './user-certificate.entity';
 import { Autorization } from './autorization.entity';
 import { Calendar } from './calendar.entity';
+import { UserDetails } from './user-details.entity';
 
 export const typeOrmEntities = [
   User,
@@ -13,9 +14,10 @@ export const typeOrmEntities = [
   Generation,
   Attendance,
   Photo,
-  Constancy,
+  UserCertificate,
   Autorization,
   Calendar,
+  UserDetails,
 ];
 
 export * from './token.entity';
@@ -27,6 +29,7 @@ export * from './attendance.entity';
 export * from './raeason-attendance.entity';
 export * from './photo.entity';
 export * from './success-message.entity';
-export * from './constancy.entity';
+export * from './user-certificate.entity';
 export * from './autorization.entity';
 export * from './calendar.entity';
+export * from './user-details.entity';

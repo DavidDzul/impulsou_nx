@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './strategies/';
 import { PassportModule } from '@nestjs/passport';
 import { AdminDbModule } from '../admin-db';
+import { UsersDbModule } from '../users-db';
 @Module({
   imports: [
     JwtModule.registerAsync({
@@ -22,6 +23,7 @@ import { AdminDbModule } from '../admin-db';
     }),
     PassportModule,
     AdminDbModule,
+    UsersDbModule,
   ],
   providers: [AuthDbService, LocalStrategy],
   exports: [AuthDbService, JwtModule, LocalStrategy],

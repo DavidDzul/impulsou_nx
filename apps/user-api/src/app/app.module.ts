@@ -8,26 +8,8 @@ import { typeOrmEntities } from '@impulsou/models';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { GenerationModule } from './generation/generation.module';
-import { AttendanceModule } from './attendance/attendance.module';
-import { PhotosModule } from './photos/photos.module';
-import { FilesModule } from './files/files.module';
-import { UserCertificateModule } from './user-certificate/user-certificate.module';
-import { AutorizationModule } from './autorization/autorization.module';
-import { CalendarModule } from './calendar/calendar.module';
 
-export const PsicoModules = [
-  AuthModule,
-  UsersModule,
-  GenerationModule,
-  AttendanceModule,
-  PhotosModule,
-  FilesModule,
-  UserCertificateModule,
-  AutorizationModule,
-  CalendarModule,
-];
+export const PsicoModules = [AuthModule];
 
 @Module({
   imports: [
@@ -58,10 +40,10 @@ export const PsicoModules = [
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       useFactory: () => ({
-        autoSchemaFile: join(process.cwd(), 'schemas/psicol-schema.gql'),
+        autoSchemaFile: join(process.cwd(), 'schemas/user-schema.gql'),
         playground: false,
         plugins: [ApolloServerPluginLandingPageLocalDefault()],
-        path: '/graphql/psicol',
+        path: '/graphql/user',
         include: [...PsicoModules],
       }),
     }),

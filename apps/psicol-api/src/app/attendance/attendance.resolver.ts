@@ -73,6 +73,7 @@ export class AttendanceResolver {
           userId: user.id,
           checkIn: time,
           delay: isLate,
+          recordDate: date,
         });
       } else {
         this.logger.log(`Attendance FOUND with user id:  ${user.id}. `);
@@ -107,11 +108,8 @@ export class AttendanceResolver {
       this.logger.log(
         `create attendance with user id ${createAttendanceInput.userId}.`
       );
-      const currentDate = dayjs(createAttendanceInput.date);
-      const date = currentDate.format('YYYY-MM-DD');
       const attendance = await this.attendanceDbService.create({
         ...createAttendanceInput,
-        recordDate: date,
         checkIn: '00:00:00',
         checkOut: '00:00:00',
       });

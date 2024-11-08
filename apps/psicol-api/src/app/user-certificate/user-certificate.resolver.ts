@@ -1,5 +1,5 @@
-import { Constancy, SuccessMessage } from '@impulsou/models';
-import { ConstancyDbService, UsersDbService } from '@impulsou/services';
+import { UserCertificate, SuccessMessage } from '@impulsou/models';
+import { UserCertificateDbService, UsersDbService } from '@impulsou/services';
 import { S3Service } from '@impulsou/shared';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
 import {
@@ -14,16 +14,16 @@ import dayjs from 'dayjs';
 import { FileUpload, GraphQLUpload } from 'graphql-upload';
 import { v4 as uuidv4 } from 'uuid';
 
-@Resolver(() => Constancy)
-export class ConstancyResolver {
-  private readonly logger = new Logger(ConstancyResolver.name);
+@Resolver(() => UserCertificate)
+export class UserCertificateResolver {
+  private readonly logger = new Logger(UserCertificateResolver.name);
   constructor(
-    private readonly constancyDbService: ConstancyDbService,
+    private readonly userCertificateDbService: UserCertificateDbService,
     private readonly usersDbService: UsersDbService,
     private readonly s3Service: S3Service
   ) {}
 
-  @Mutation(() => Constancy)
+  @Mutation(() => UserCertificate)
   async createConstancy(
     @Args({ name: 'userId', type: () => Int })
     userId: number,
@@ -44,7 +44,7 @@ export class ConstancyResolver {
       const date = currentDate.format('YYYY-MM-DD HH:mm:ss');
 
       const res = await this.s3Service.uploadRecordFile(recordFile, user.id);
-      const result = await this.constancyDbService.create({
+      const result = await this.userCertificateDbService.create({
         name: date,
         fileId: uuidv4(),
         url: res.Key,
@@ -65,9 +65,11 @@ export class ConstancyResolver {
     id: number
   ) {
     try {
-      const document = await this.constancyDbService.findOne({ where: { id } });
+      const document = await this.userCertificateDbService.findOne({
+        where: { id },
+      });
       this.s3Service.deleteFile(document.url).then().catch();
-      await this.constancyDbService.remove(document);
+      await this.userCertificateDbService.remove(document);
       return { message: 'Constancia de estudios eliminada exitosamente' };
     } catch (e) {
       this.logger.error(e);

@@ -1,0 +1,167 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: Int!
+  enrollment: String
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  phone: String
+  active: Boolean!
+  campus: CampusEnum!
+  generationId: Int
+  role: RoleUser!
+  createdAt: String!
+  updatedAt: String!
+  generation: Generation!
+  attendances: Attendance
+  photos: [Photo!]
+  document: [UserCertificate!]
+  autorization: [Autorization!]
+}
+
+enum CampusEnum {
+  MERIDA
+  VALLADOLID
+  TIZIMIN
+  OXKUTZCAB
+}
+
+enum RoleUser {
+  STUDENT
+  GRADUATE
+  BUSSINES
+}
+
+type Admin {
+  id: Int!
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  active: Boolean!
+  role: RoleEnum
+  campus: CampusEnum!
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum RoleEnum {
+  ADMIN
+  PSICOL
+}
+
+type Generation {
+  id: Int!
+  entryName: Int!
+  campus: CampusEnum!
+  inProgress: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  users: [User!]!
+  calendar: [Calendar!]!
+}
+
+type Attendance {
+  id: Int!
+  userId: Int!
+  checkIn: String!
+  checkOut: String
+  recordDate: String!
+  delay: Boolean!
+  justifiedDelay: Boolean!
+  justifiedAbsence: Boolean!
+  reason: ReasonEmun
+  descripcion: String
+  createdAt: String!
+  updatedAt: String!
+  user: User!
+}
+
+enum ReasonEmun {
+  ACADEMIC
+  PERSONAL
+  OTHER
+}
+
+type Photo {
+  id: Int!
+  userId: Int!
+  url: String!
+  admin: Boolean!
+  createdAt: String!
+}
+
+type UserCertificate {
+  id: Int!
+  name: String!
+  userId: Int!
+  url: String!
+  fileId: String!
+  startDate: String!
+  endDate: String!
+  createdAt: String!
+}
+
+type Autorization {
+  id: Int!
+  userId: Int!
+  status: StatusAutorizationEmun!
+  percentage: Int
+  previousPayment: Boolean!
+  numberMonths: Int
+  previousMonths: String
+  cause: CauseEmun
+  otherCause: String
+  date: String!
+  createdAt: String!
+  updatedAt: String!
+  user: User!
+}
+
+enum StatusAutorizationEmun {
+  ACTIVE
+  SUSPENDED
+  GRADUATE
+  DETAINED
+}
+
+enum CauseEmun {
+  FAULTS
+  NOTCONSTANCY
+  PROVGRADES
+  ORIGRADES
+  LOWAVERAGE
+  EXTRAORDINARY
+  PERSONALSCHOOL
+  VOCATIONALSCHOOL
+  MISSING
+  BREAKRULES
+  OTHER
+}
+
+type Calendar {
+  id: Int!
+  name: String!
+  generationId: Int!
+  date: String!
+  campus: CampusEnum!
+  createdAt: String!
+  updatedAt: String!
+  generation: Generation!
+}
+
+type Token {
+  token: String!
+}
+
+type Query {
+  profile: Admin!
+}
+
+type Mutation {
+  login(email: String!, password: String!): Token!
+}

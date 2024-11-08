@@ -4,27 +4,27 @@
 
 type User {
   id: Int!
+  enrollment: String
   firstName: String!
   lastName: String!
   email: String!
   password: String!
-  enrollment: String!
   phone: String
   active: Boolean!
   campus: CampusEnum!
-  generationId: Int!
+  generationId: Int
   role: RoleUser!
   createdAt: String!
   updatedAt: String!
   generation: Generation!
   attendances: Attendance
   photos: [Photo!]
-  constancy: [Constancy!]
+  document: [UserCertificate!]
   autorization: [Autorization!]
   attendanceMap: [Attendance!]
   images: [Photo!]!
-  documents: [Constancy!]!
-  lastConstancy: Constancy
+  documents: [UserCertificate!]!
+  lastConstancy: UserCertificate
   autorizationMonth(date: String!): [Autorization!]
 }
 
@@ -38,6 +38,7 @@ enum CampusEnum {
 enum RoleUser {
   STUDENT
   GRADUATE
+  BUSSINES
 }
 
 type Admin {
@@ -100,7 +101,7 @@ type Photo {
   createdAt: String!
 }
 
-type Constancy {
+type UserCertificate {
   id: Int!
   name: String!
   userId: Int!
@@ -170,8 +171,10 @@ type SuccessMessage {
 type Query {
   findAllCalendar: [Calendar!]!
   findAllGenerations: [Generation!]!
+  getAllStudents: [User!]!
+  getAllGraduates: [User!]!
+  getAllBusiness: [User!]!
   findOneUser(id: Int!): User!
-  findAllUsers: [User!]!
   profile: Admin!
 }
 
@@ -181,7 +184,7 @@ type Mutation {
   removeCalendar(id: Int!): SuccessMessage!
   createAutorization(createAutorizationInput: CreateAutorizationInput!): Autorization!
   updateAutorization(updateAutorizationInput: UpdateAutorizationInput!): Autorization!
-  createConstancy(userId: Int!, recordFile: Upload!, startDate: String!, endDate: String!): Constancy!
+  createConstancy(userId: Int!, recordFile: Upload!, startDate: String!, endDate: String!): UserCertificate!
   removeConstancy(id: Int!): SuccessMessage!
   createPhoto(userId: Int!, photo: Upload!): Photo!
   removePhoto(id: Int, userId: Int!): SuccessMessage!
@@ -191,7 +194,7 @@ type Mutation {
   findAttendanceUsers(campus: CampusEnum!, generation: Int!, date: String!): [Attendance!]!
   createGeneration(createGenerationInput: CreateGenerationInput!): Generation!
   updateGeneration(updateGenerationInput: UpdateGenerationInput!): Generation!
-  searchAllUsers(campus: CampusEnum!, generation: Int!, date: String): [User!]!
+  autorizationUsers(campus: CampusEnum!, generation: Int!, date: String): [User!]!
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
   login(email: String!, password: String!): Token!
@@ -244,7 +247,7 @@ input AttendanceInput {
 
 input CreateAttendanceInput {
   userId: Int!
-  date: String!
+  recordDate: String!
   delay: Boolean!
   justifiedDelay: Boolean!
   justifiedAbsence: Boolean!
@@ -254,7 +257,7 @@ input CreateAttendanceInput {
 
 input UpdateAttendanceInput {
   userId: Int
-  date: String
+  recordDate: String
   delay: Boolean
   justifiedDelay: Boolean
   justifiedAbsence: Boolean
@@ -298,4 +301,5 @@ input UpdateUserInput {
   role: RoleUser
   id: Int!
   active: Boolean
+  discount: Int
 }

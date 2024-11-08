@@ -45,11 +45,24 @@ export class AutorizationResolver {
       this.logger.log(
         `create autorization with user id ${createAutorizationInput.userId}.`
       );
+
       const date = dayjs(createAutorizationInput.date).format('YYYY-MM-DD');
+      const existingAutorization = await this.autorizationDbService.findOne(
+        { where: { userId: createAutorizationInput.userId, date } },
+        false
+      );
+      if (existingAutorization) {
+        throw new InternalServerErrorException({
+          status: 409,
+          message: 'Ya existe una autorización para este mes.',
+        });
+      }
+
       const autorization = await this.autorizationDbService.create({
         ...createAutorizationInput,
         date,
       });
+
       return autorization;
     } catch (e) {
       if (e instanceof EntityNotFoundError) {

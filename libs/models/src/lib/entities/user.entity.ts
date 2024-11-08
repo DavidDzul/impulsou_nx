@@ -14,11 +14,18 @@ import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 
 import { CampusEnum } from './campus.entity';
-import { Generation, Attendance, Photo, Constancy, Autorization } from './';
+import {
+  Generation,
+  Attendance,
+  Photo,
+  UserCertificate,
+  Autorization,
+} from './';
 
 export enum RoleUser {
   STUDENT = 'STUDENT',
   GRADUATE = 'GRADUATE',
+  BUSSINES = 'BUSINESS',
 }
 
 registerEnumType(RoleUser, {
@@ -31,6 +38,10 @@ export class User {
   @PrimaryGeneratedColumn()
   @Field(() => Int)
   id: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  enrollment?: string;
 
   @Column()
   @Field()
@@ -48,10 +59,6 @@ export class User {
   @Field()
   password: string;
 
-  @Column()
-  @Field()
-  enrollment: string;
-
   @Column({ nullable: true })
   @Field({
     nullable: true,
@@ -66,9 +73,9 @@ export class User {
   @Field(() => CampusEnum)
   campus: CampusEnum;
 
-  @Column({ unsigned: true })
-  @Field(() => Int)
-  generationId: number;
+  @Column({ unsigned: true, nullable: true })
+  @Field(() => Int, { nullable: true })
+  generationId?: number;
 
   @Column({ type: 'enum', enum: RoleUser })
   @Field(() => RoleUser)
@@ -95,9 +102,9 @@ export class User {
   @Field(() => [Photo], { nullable: true })
   photos: Photo[];
 
-  @OneToMany(() => Constancy, (constancy) => constancy.user)
-  @Field(() => [Constancy], { nullable: true })
-  constancy: Constancy[];
+  @OneToMany(() => UserCertificate, (document) => document.user)
+  @Field(() => [UserCertificate], { nullable: true })
+  document: UserCertificate[];
 
   @OneToMany(() => Autorization, (autorization) => autorization.user)
   @Field(() => [Autorization], { nullable: true })

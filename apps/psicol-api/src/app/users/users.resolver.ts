@@ -8,7 +8,7 @@ import {
   Attendance,
   RoleUser,
   Photo,
-  Constancy,
+  UserCertificate,
   Autorization,
 } from '@impulsou/models';
 import {
@@ -31,7 +31,7 @@ import {
   UsersDbService,
   AttendanceDbService,
   PhotosDbService,
-  ConstancyDbService,
+  UserCertificateDbService,
   AutorizationDbService,
 } from '@impulsou/services';
 import { CurrentUser, GqlAuthGuard } from '@impulsou/shared';
@@ -47,14 +47,76 @@ export class UsersResolver {
     private readonly usersDbService: UsersDbService,
     private readonly attendanceDbService: AttendanceDbService,
     private readonly photosDbService: PhotosDbService,
-    private readonly constancyDbService: ConstancyDbService,
+    private readonly userCertificateDbService: UserCertificateDbService,
     private readonly autorizationDbService: AutorizationDbService
   ) {}
 
-  //SERVICIO PARA OBTENER POR GENERACIÓN Y SEDE A LOS USUARIOS EN TABLA DE USUARIOS Y TABLA DE AUTORIZACIÓN
+  // OBTENER TODOS LOS USUARIOS DE LA SEDE
+  @Query(() => [User])
+  @UseGuards(GqlAuthGuard)
+  async getAllStudents(@CurrentUser() admin: Admin) {
+    try {
+      this.logger.log('Finding all users-db.');
+      if (admin.campus !== CampusEnum.MERIDA) {
+        return await this.usersDbService.findAll({
+          where: { campus: admin.campus, role: RoleUser.STUDENT },
+        });
+      }
+
+      return await this.usersDbService.findAll({
+        where: { role: RoleUser.STUDENT },
+      });
+    } catch (e) {
+      this.logger.error('Error finding all users-db.', e);
+      throw new InternalServerErrorException({
+        status: 500,
+        message: InternalServerError.SERVER,
+      });
+    }
+  }
+
+  @Query(() => [User])
+  @UseGuards(GqlAuthGuard)
+  async getAllGraduates(@CurrentUser() admin: Admin) {
+    try {
+      const { campus } = admin;
+      this.logger.log('Finding all users-db.');
+      const allUsers = await this.usersDbService.findAll({
+        where: { campus, role: RoleUser.GRADUATE },
+      });
+      return allUsers;
+    } catch (e) {
+      this.logger.error('Error finding all users-db.', e);
+      throw new InternalServerErrorException({
+        status: 500,
+        message: InternalServerError.SERVER,
+      });
+    }
+  }
+
+  @Query(() => [User])
+  @UseGuards(GqlAuthGuard)
+  async getAllBusiness(@CurrentUser() admin: Admin) {
+    try {
+      const { campus } = admin;
+      this.logger.log('Finding all users-db.');
+      const allUsers = await this.usersDbService.findAll({
+        where: { campus, role: RoleUser.BUSSINES },
+      });
+      return allUsers;
+    } catch (e) {
+      this.logger.error('Error finding all users-db.', e);
+      throw new InternalServerErrorException({
+        status: 500,
+        message: InternalServerError.SERVER,
+      });
+    }
+  }
+
+  //SERVICIO PARA OBTENER POR GENERACIÓN Y SEDE LA TABLA DE AUTORIZACIÓN
   @Mutation(() => [User])
   @UseGuards(GqlAuthGuard)
-  async searchAllUsers(
+  async autorizationUsers(
     @Args('campus', { type: () => CampusEnum }) campus: CampusEnum,
     @Args('generation', { type: () => Int }) generation: number,
     @Args('date', { type: () => String, nullable: true }) date?: string
@@ -97,26 +159,6 @@ export class UsersResolver {
     }
   }
 
-  // OBTENER TODOS LOS USUARIOS DE LA SEDE PARA REGISTRAR ASISTENCIAS
-  @Query(() => [User])
-  @UseGuards(GqlAuthGuard)
-  async findAllUsers(@CurrentUser() admin: Admin) {
-    try {
-      const { campus } = admin;
-      this.logger.log('Finding all users-db.');
-      const allUsers = await this.usersDbService.findAll({
-        where: { campus, role: RoleUser.STUDENT },
-      });
-      return allUsers;
-    } catch (e) {
-      this.logger.error('Error finding all users-db.', e);
-      throw new InternalServerErrorException({
-        status: 500,
-        message: InternalServerError.SERVER,
-      });
-    }
-  }
-
   @Mutation(() => User)
   @UseGuards(GqlAuthGuard)
   async createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
@@ -131,19 +173,6 @@ export class UsersResolver {
         throw new BadRequestException({
           status: 400,
           message: BadRequestError.EMAIL_USED,
-        });
-      }
-
-      if (
-        await this.usersDbService.findOne(
-          { where: { enrollment: createUserInput.enrollment } },
-          false
-        )
-      ) {
-        this.logger.log('Register User Fail: Duplicate Enrollment');
-        throw new BadRequestException({
-          status: 400,
-          message: BadRequestError.ENROLLMENT_USED,
         });
       }
 
@@ -220,19 +249,19 @@ export class UsersResolver {
     });
   }
 
-  @ResolveField(() => [Constancy])
+  @ResolveField(() => [UserCertificate])
   async documents(@Parent() user: User) {
     const { id } = user;
-    return this.constancyDbService.findAll({
+    return this.userCertificateDbService.findAll({
       where: { userId: id },
       order: { createdAt: 'DESC' },
     });
   }
 
-  @ResolveField(() => Constancy, { nullable: true })
+  @ResolveField(() => UserCertificate, { nullable: true })
   async lastConstancy(@Parent() user: User) {
     const { id } = user;
-    const document = await this.constancyDbService.findOne(
+    const document = await this.userCertificateDbService.findOne(
       { where: { userId: id }, order: { createdAt: 'DESC' } },
       false
     );

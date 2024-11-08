@@ -20,7 +20,7 @@ export class CreateAttendanceInput {
 
   @Field()
   @IsISO8601()
-  date: string;
+  recordDate: string;
 
   @Field()
   @IsBoolean()

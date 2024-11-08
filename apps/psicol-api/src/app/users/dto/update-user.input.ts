@@ -1,7 +1,7 @@
 // NestJS Modules
 import { Field, InputType, Int, OmitType, PartialType } from '@nestjs/graphql';
 // Third-Party Libraries
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 // Dto's
 import { CreateUserInput } from './create-user.input';
@@ -17,4 +17,9 @@ export class UpdateUserInput extends PartialType(
   @IsOptional()
   @IsBoolean()
   active?: boolean;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  discount?: number;
 }

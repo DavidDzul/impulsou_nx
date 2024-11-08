@@ -4,7 +4,7 @@ import {
   UsersDbModule,
   AttendanceDbModule,
   PhotosDbModule,
-  ConstancyDbModule,
+  UserCertificateDbModule,
   AutorizationDbModule,
 } from '@impulsou/services';
 
@@ -13,7 +13,7 @@ import {
     UsersDbModule,
     AttendanceDbModule,
     PhotosDbModule,
-    ConstancyDbModule,
+    UserCertificateDbModule,
     AutorizationDbModule,
   ],
   providers: [UsersResolver],

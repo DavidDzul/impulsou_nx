@@ -1,7 +1,7 @@
 import {
   UsersDbService,
   PhotosDbService,
-  ConstancyDbService,
+  UserCertificateDbService,
 } from '@impulsou/services';
 import { S3Service } from '@impulsou/shared';
 import {
@@ -20,7 +20,7 @@ export class FilesController {
     private readonly s3Service: S3Service,
     private readonly usersDbService: UsersDbService,
     private readonly photosDbService: PhotosDbService,
-    private readonly constancyDbService: ConstancyDbService
+    private readonly userCertificateDbService: UserCertificateDbService
   ) {}
 
   @Get('users/:id/images')
@@ -52,16 +52,16 @@ export class FilesController {
   ) {
     try {
       const fileId: string = req.query.s3 as string;
-      const constancy = await this.constancyDbService.findOne({
+      const document = await this.userCertificateDbService.findOne({
         where: {
           fileId,
           userId: id,
         },
       });
-      const res = await this.s3Service.getFile(constancy.url);
+      const res = await this.s3Service.getFile(document.url);
       response.set({
         'Content-Type': res.ContentType,
-        'Content-disposition': `filename=${constancy.name}`,
+        'Content-disposition': `filename=${document.name}`,
       });
       return response.send(res.Body);
     } catch (e) {

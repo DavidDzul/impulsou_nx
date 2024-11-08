@@ -15,8 +15,8 @@ import {
 import { User } from '.';
 
 @ObjectType()
-@Entity('study-certificate')
-export class Constancy {
+@Entity('user_certificate')
+export class UserCertificate {
   @PrimaryGeneratedColumn({ unsigned: true })
   @Field(() => Int)
   id: number;
@@ -50,6 +50,6 @@ export class Constancy {
   createdAt: string;
 
   /* Relationships */
-  @ManyToOne(() => User, (user) => user.constancy)
+  @ManyToOne(() => User, (user) => user.document)
   user: User;
 }
